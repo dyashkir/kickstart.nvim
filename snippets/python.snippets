@@ -1,0 +1,41 @@
+snippet clai
+	class ${1:class_name}:
+		def __init__(self, ${2:args}):
+			${0}
+
+snippet rege
+	reg_e = re.compile("^(?P<first>[a-zA-Z]{3})-(?P<second>[a-zA-Z]+)")
+	match = reg_e.search("abd-aac")
+	first = match.group('first')
+
+snippet reqg
+	
+	import requests
+	import json
+
+	payload = { 'key1' : 'val', 'key2':[ 'val2', 'val2'] }
+	r = requests.get('https://api.github.com/events', params=payload)
+
+	r.status_code
+	data = r.json()
+	json.dumps(data, indent=2)
+
+snippet readf
+	with open('${1}', 'r') as f:
+	    for line in f:
+		${2}
+snippet readin
+	import fileinput
+	#read standard in or iterate over argv[1:]
+	for line in fileinput.input():
+		${1}
+		 
+snippet deft
+	def test_${1}():
+		${2}
+		assert ${3}, "${4}"
+
+snippet testf
+	@pytest.fixture
+	def ${1}():
+		return ${2}
