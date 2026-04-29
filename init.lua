@@ -330,6 +330,53 @@ require('lazy').setup({
   -- you do for a plugin at the top level, you can do for a dependency.
   --
   -- Use the `dependencies` key to specify the dependencies of a particular plugin
+  {
+    'olimorris/codecompanion.nvim',
+    lazy = false,
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-treesitter/nvim-treesitter',
+    },
+    opts = {
+      interactions = {
+        chat = {
+          adapter = {
+            name = 'openai',
+            model = 'gpt-5.4-mini',
+          },
+        },
+        inline = {
+          adapter = {
+            name = 'openai',
+            model = 'gpt-5.4-mini',
+          },
+        },
+        cmd = {
+          adapter = {
+            name = 'openai',
+            model = 'gpt-5.4-mini',
+          },
+        },
+      },
+    },
+    keys = {
+      { '<leader>ac', '<cmd>CodeCompanionChat Toggle<cr>', desc = 'AI Chat' },
+      { '<leader>aa', '<cmd>CodeCompanionActions<cr>', desc = 'AI Actions' },
+      { '<leader>ai', '<cmd>CodeCompanion<cr>', mode = { 'n', 'v' }, desc = 'AI Inline' },
+    },
+  },
+
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    ft = { 'markdown', 'codecompanion' },
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-tree/nvim-web-devicons',
+    },
+    opts = {
+      file_types = { 'markdown', 'codecompanion' },
+    },
+  },
 
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
@@ -899,7 +946,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'python' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
