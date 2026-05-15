@@ -330,51 +330,40 @@ require('lazy').setup({
   -- you do for a plugin at the top level, you can do for a dependency.
   --
   -- Use the `dependencies` key to specify the dependencies of a particular plugin
-  {
-    'olimorris/codecompanion.nvim',
-    lazy = false,
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'nvim-treesitter/nvim-treesitter',
-    },
-    opts = {
-      interactions = {
-        chat = {
-          adapter = {
-            name = 'openai',
-            model = 'gpt-5.4-mini',
-          },
-        },
-        inline = {
-          adapter = {
-            name = 'openai',
-            model = 'gpt-5.4-mini',
-          },
-        },
-        cmd = {
-          adapter = {
-            name = 'openai',
-            model = 'gpt-5.4-mini',
-          },
-        },
-      },
-    },
-    keys = {
-      { '<leader>ac', '<cmd>CodeCompanionChat Toggle<cr>', desc = 'AI Chat' },
-      { '<leader>aa', '<cmd>CodeCompanionActions<cr>', desc = 'AI Actions' },
-      { '<leader>ai', '<cmd>CodeCompanion<cr>', mode = { 'n', 'v' }, desc = 'AI Inline' },
-    },
-  },
 
   {
     'MeanderingProgrammer/render-markdown.nvim',
-    ft = { 'markdown', 'codecompanion' },
+    ft = { 'markdown' },
     dependencies = {
       'nvim-treesitter/nvim-treesitter',
       'nvim-tree/nvim-web-devicons',
     },
     opts = {
-      file_types = { 'markdown', 'codecompanion' },
+      file_types = { 'markdown' },
+    },
+  },
+
+  { -- Small UI/utility modules; currently used for file picking and opencode UI helpers
+    'folke/snacks.nvim',
+    lazy = false,
+    priority = 1000,
+    opts = {
+      input = {}, -- Enhances opencode ask()
+      picker = { -- File picker and opencode select() integration
+        ui_select = false, -- telescope-ui-select.nvim already handles vim.ui.select
+        actions = {
+          opencode_send = function(...)
+            return require('opencode').snacks_picker_send(...)
+          end,
+        },
+        win = {
+          input = {
+            keys = {
+              ['<a-a>'] = { 'opencode_send', mode = { 'n', 'i' } },
+            },
+          },
+        },
+      },
     },
   },
 
@@ -398,6 +387,48 @@ require('lazy').setup({
         end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
+
+      {
+        'nickjvandyke/opencode.nvim',
+        version = '*', -- Latest stable release
+        config = function()
+          ---@type opencode.Opts
+          vim.g.opencode_opts = {
+            -- Your configuration, if any; goto definition on the type or field for details
+          }
+
+          vim.o.autoread = true -- Required for `opts.events.reload`
+
+          -- Recommended/example keymaps
+          vim.keymap.set({ 'n', 'x' }, '<C-a>', function()
+            require('opencode').ask('@this: ', { submit = true })
+          end, { desc = 'Ask opencode…' })
+          vim.keymap.set({ 'n', 'x' }, '<C-x>', function()
+            require('opencode').select()
+          end, { desc = 'Execute opencode action…' })
+          vim.keymap.set({ 'n', 't' }, '<C-.>', function()
+            require('opencode').toggle()
+          end, { desc = 'Toggle opencode' })
+
+          vim.keymap.set({ 'n', 'x' }, 'go', function()
+            return require('opencode').operator '@this '
+          end, { desc = 'Add range to opencode', expr = true })
+          vim.keymap.set('n', 'goo', function()
+            return require('opencode').operator '@this ' .. '_'
+          end, { desc = 'Add line to opencode', expr = true })
+
+          vim.keymap.set('n', '<S-C-u>', function()
+            require('opencode').command 'session.half.page.up'
+          end, { desc = 'Scroll opencode up' })
+          vim.keymap.set('n', '<S-C-d>', function()
+            require('opencode').command 'session.half.page.down'
+          end, { desc = 'Scroll opencode down' })
+
+          -- You may want these if you use the opinionated `<C-a>` and `<C-x>` keymaps above — otherwise consider `<leader>o…` (and remove terminal mode from the `toggle` keymap)
+          vim.keymap.set('n', '+', '<C-a>', { desc = 'Increment under cursor', noremap = true })
+          vim.keymap.set('n', '-', '<C-x>', { desc = 'Decrement under cursor', noremap = true })
+        end,
+      },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
@@ -449,7 +480,9 @@ require('lazy').setup({
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>sf', function()
+        Snacks.picker.files()
+      end, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
